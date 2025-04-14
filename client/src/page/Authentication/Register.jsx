@@ -9,26 +9,29 @@ import toast from "react-hot-toast";
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
-   const from = location.state || '/';
-  const {
-    user,
-    setUser,
-    createUser,
-    signInWithGoogle,
-    updateUserProfile,
-  } = useContext(AuthContext);
+  const from = location.state || "/";
+  const { user, setUser, createUser, signInWithGoogle, updateUserProfile } =
+    useContext(AuthContext);
 
   // google sign in function
-  const handleGoogleSignIn = async() => {
-    try{
-        await signInWithGoogle()
-        toast.success("Successfully signed in with Google")
-        navigate(from, { replace: true });
-    } catch(error){
-        console("Error signing in with Google:", error);
-        toast.error("Failed to sign in with Google")
-      }
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithGoogle();
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/jwt`,
+        { email: result?.user?.email },
+        { withCredentials: true }
+      );
+      toast.success("Successfully signed in with Google");
+      navigate(from, { replace: true });
+
+      toast.success("Successfully signed in with Google");
+      navigate(from, { replace: true });
+    } catch (error) {
+      console("Error signing in with Google:", error);
+      toast.error("Failed to sign in with Google");
     }
+  };
 
   // register function
   const handleRegister = async (event) => {
@@ -40,9 +43,17 @@ const Register = () => {
     const password = form.password.value;
     try {
       const result = await createUser(email, password);
-      console.log(result);
+
       await updateUserProfile(name, photo);
-      setUser({...user, displayName: name, photoURL: photo});
+      setUser({ ...result?.user, displayName: name, photoURL: photo });
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/jwt`,
+        { email: result?.user?.email },
+        { withCredentials: true }
+      );
+      toast.success("Successfully signed in with Google");
+      navigate(from, { replace: true });
+
       navigate(from, { replace: true });
       toast.success("Successfully registered");
     } catch (error) {
@@ -61,7 +72,10 @@ const Register = () => {
             Get Your Free Account Now.
           </p>
 
-          <div onClick={handleGoogleSignIn} className="flex cursor-pointer items-center justify-center mt-4 text-gray-600 transition-colors duration-300 transform border rounded-lg   hover:bg-gray-50 ">
+          <div
+            onClick={handleGoogleSignIn}
+            className="flex cursor-pointer items-center justify-center mt-4 text-gray-600 transition-colors duration-300 transform border rounded-lg   hover:bg-gray-50 "
+          >
             <div className="px-4 py-2">
               <svg className="w-6 h-6" viewBox="0 0 40 40">
                 <path

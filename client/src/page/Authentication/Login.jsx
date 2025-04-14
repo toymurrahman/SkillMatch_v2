@@ -5,6 +5,7 @@ import animationData from "../../../public/signinLottie.json";
 import logo from "../../image/skiiiilsharedmatch.png";
 import { AuthContext } from "../../provider/AuthProvider";
 import toast from "react-hot-toast";
+import  axios  from 'axios';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -20,9 +21,11 @@ const Login = () => {
 // google sign in function
 const handleGoogleSignIn = async() => {
 try{
-    await signInWithGoogle()
+  const result =  await signInWithGoogle()
+  const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/jwt`, {email: result?.user?.email}, {withCredentials: true}) 
     toast.success("Successfully signed in with Google")
     navigate(from, { replace: true })
+    console.log(data);
 } catch(error){
     console("Error signing in with Google:", error);
     toast.error("Failed to sign in with Google")
@@ -37,10 +40,14 @@ const handleSignIn = async (event) => {
     try {
      const result = await signIn(email, password);
      console.log(result);
+     const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/jwt`, {email: result?.user?.email}, {withCredentials: true}) 
+     toast.success("Successfully signed in with Google")
+     navigate(from, { replace: true })
+     console.log(data);
       toast.success("Successfully signin")
       navigate(from, { replace: true })
     } catch (error) {
-      console("Error signing in:", error);
+      console.log("Error signing in:", error);
       toast.error("Failed to sign in", error.message);
     }
   };

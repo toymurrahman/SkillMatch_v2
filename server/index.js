@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -30,6 +32,32 @@ async function run() {
     // Database connection
     const jobsCollection = client.db("skillmatch").collection("jobs");
     const bidsCollection = client.db("skillmatch").collection("bids");
+
+
+    // JWT token Generation
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "22d",
+      });
+      res.cookie('Token', token,{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+        maxAge: 22 * 24 * 60 * 60 * 1000,
+      })
+      .send({success: true})
+    });
+    // clear token when user logout
+    app.get("/logout", (req, res) => {
+      res.clearCookie("Token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+      });
+      res.send({ success: true });
+    });
+
 
     // get all jobs data from database
     app.get("/jobs", async (req, res) => {
