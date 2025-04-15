@@ -11,10 +11,10 @@ const MyBids = () => {
   }, [user]);
   const getData = async () => {
     const { data } = await axios(
-      `${import.meta.env.VITE_API_URL}/mybids/${user?.email}`) ;
+      `${import.meta.env.VITE_API_URL}/mybids/${user?.email}`,{withCredentials: true}) ;
     setBids(data);
   };
-  console.log(bids);
+  console.log('my bids', bids);
 
   
   const handleStatus = async (id, status) => {

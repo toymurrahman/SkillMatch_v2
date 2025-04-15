@@ -10,7 +10,8 @@ const BidRequests = () => {
   }, [user]);
   const getData = async () => {
     const { data } = await axios(
-      `${import.meta.env.VITE_API_URL}/bidrequest/${user?.email}`
+      `${import.meta.env.VITE_API_URL}/bidrequest/${user?.email}`,
+      {withCredentials: true}
     );
     setBids(data);
     console.log(data);
@@ -119,7 +120,7 @@ const BidRequests = () => {
                       </td>
 
                       <td className="px-4 py-4 text-sm text-gray-500  whitespace-nowrap">
-                        {bid.min_price}
+                        {bid.price}
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
                         <div className="flex items-center gap-x-2">
@@ -161,13 +162,13 @@ const BidRequests = () => {
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
                         <div
-                          onClick={() =>
-                            handleStatus(bid._id, bid.status, "In Progress")
-                          }
-                          disabled={bid.status === "Complete"}
+                          
                           className="flex items-center gap-x-6"
                         >
-                          <button className="text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none">
+                          <button onClick={() =>
+                            handleStatus(bid._id, bid.status, "In Progress")
+                          }
+                          disabled={bid.status === "Complete"} className="text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"

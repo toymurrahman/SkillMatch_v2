@@ -36,12 +36,25 @@ const AuthProvider = ({ children }) => {
   }
 
   const logOut = async () => {
-    setLoading(true)
-    const { data } = await axios(`${import.meta.env.VITE_API_URL}/logout`, {
-      withCredentials: true,
-    })
-    return signOut(auth)
-  }
+    try {
+      setLoading(true);
+  
+      // Optional: call backend to clear cookies
+      await axios(`${import.meta.env.VITE_API_URL}/logout`, {
+        withCredentials: true,
+      });
+  
+      // Firebase sign out
+      await signOut(auth);
+  
+      toast.success("Successfully logged out!");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Failed to log out.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateUserProfile = (name, photo) => {
     return updateProfile(auth.currentUser, {

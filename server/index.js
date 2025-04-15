@@ -14,6 +14,22 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
+
+// verify JWT token
+const verifyJWT = (req, res, next) => {
+  const token = req.cookies.Token;
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized access" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
 
 // MongoDB connection
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eahhj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -81,8 +97,10 @@ async function run() {
       res.send(result);
     });
 
-    // get posted job by a specific user
+    // get posted job by a specific user email
     app.get("/jobs/:email", async (req, res) => {
+      // const token = req.cookies.Token;
+      // console.log(token);
       const email = req.params.email;
       const query = { "buyer.email": email };
       const cursor = jobsCollection.find(query);
@@ -126,7 +144,7 @@ async function run() {
       res.send(bids);
     });
     // get all bids data by email from database
-    app.get("/mybids/:email", async (req, res) => {
+    app.get("/mybids/:email",verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const cursor = bidsCollection.find(query);
@@ -135,7 +153,7 @@ async function run() {
     });
 
     //  get bid req for job owner
-    app.get("/bidrequest/:email", async (req, res) => {
+    app.get("/bidrequest/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { buyer_email : email };
       const cursor = bidsCollection.find(query);
