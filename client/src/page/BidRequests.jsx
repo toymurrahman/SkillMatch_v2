@@ -1,40 +1,65 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../provider/AuthProvider";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import useAuth from "../hooks/useAuth";
+import toast from "react-hot-toast";
 const BidRequests = () => {
-  const { user } = useContext(AuthContext);
-  const [bids, setBids] = useState([]);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
 
-  useEffect(() => {
-    getData();
-  }, [user]);
-  const getData = async () => {
-    const { data } = await axios(
-      `${import.meta.env.VITE_API_URL}/bidrequest/${user?.email}`,
-      {withCredentials: true}
-    );
-    setBids(data);
-    console.log(data);
-  };
 
- 
-  
-  const handleStatus = async (id, currentStatus, newStatus) => {
-    if (currentStatus === "Complete") return;
+    // Fetch data from the server
+    const getData = async () => {
+      const { data } = await axiosSecure(`/bidrequest/${user.email}`);
+      return data;
+    };
 
-    try {
-      const response = await axios.patch(
+  // tanstack query get
+  const {
+    data: bids = [],
+    isLoading,
+    refetch,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["bids", user?.email],
+    queryFn: () => getData(),
+    // enabled: !!user?.email,
+  });
+
+  // useEffect(() => {
+  //   getData();
+  // }, [user]);
+
+  // tanstack mutation
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ id, status }) => {
+      const { data } = await axios.patch(
         `${import.meta.env.VITE_API_URL}/bid/${id}`,
-        { status: newStatus }
+        { status }
       );
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Status updated successfully");
+      refetch(); /*Refetch the data after a mutation*/
+    },
+  });
 
-      if (response.data.modifiedCount > 0) {
-        getData(); // Refresh list
-      }
-    } catch (error) {
-      console.error("Failed to update status:", error);
-    }
+  const handleStatus = async (id, currentStatus, status) => {
+    if (currentStatus === status) return;
+
+    await mutateAsync({ id, status });
   };
+  if (isError) {
+    return <p className="text-red-500">Error loading bids: {error.message}</p>;
+  }
+  if (isLoading) {
+    return (
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-black border-teal-500"></div>
+    );
+  }
 
   return (
     <section className="container px-4 mx-auto pt-12">
@@ -161,14 +186,14 @@ const BidRequests = () => {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
-                        <div
-                          
-                          className="flex items-center gap-x-6"
-                        >
-                          <button onClick={() =>
-                            handleStatus(bid._id, bid.status, "In Progress")
-                          }
-                          disabled={bid.status === "Complete"} className="text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none">
+                        <div className="flex items-center gap-x-6">
+                          <button
+                            onClick={() =>
+                              handleStatus(bid._id, bid.status, "In Progress")
+                            }
+                            disabled={bid.status === "Complete"}
+                            className="text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
@@ -185,10 +210,13 @@ const BidRequests = () => {
                             </svg>
                           </button>
 
-                          <button  onClick={() =>
-                              handleStatus(bid._id, bid.status, 'Rejected')
+                          <button
+                            onClick={() =>
+                              handleStatus(bid._id, bid.status, "Rejected")
                             }
-                            disabled={bid.status === 'Complete'} className="text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none">
+                            disabled={bid.status === "Complete"}
+                            className="text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
