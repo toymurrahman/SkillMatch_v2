@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: ["http://localhost:5173", "http://localhost:5174","https://skillmatch-914bf.firebaseapp.com","https://skillmatch-914bf.web.app"],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -129,7 +129,6 @@ async function run() {
       res.send(result);
     });
 
-
     // get all bids data from database
     app.get("/bid", async (req, res) => {
       const query = {};
@@ -184,23 +183,50 @@ async function run() {
     });
 
     // Pagination and filtering
-      // get all jobs data from database for pagination
-      app.get("/alljobs", async (req, res) => {
-        const page = parseInt(req.query.page) - 1;
-        const size = parseInt(req.query.size);  
+    // get all jobs data from database for pagination
+    app.get("/alljobs", async (req, res) => {
+      const page = parseInt(req.query.page) - 1;
+      const size = parseInt(req.query.size);
+      const filter = req.query.filter;
+      const sort = req.query.sort;
+      const search = req.query.search;
+      let query = {
+        title: {
+          $regex: search ? search : ".*",
+          $options: "i",
+        }
+      }
+      if (filter) query.category = filter;
+      let options = {};
+      if (sort) {
+        options = { sort: { deadline: sort === "asc" ? 1 : -1 } };
+      }
 
-        const result = await jobsCollection.find().skip(page*size).limit(size).toArray();
-  
-        res.send(result);
-      });
+      const result = await jobsCollection
+        .find(query, options)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
 
-        // get all jobs data from database for count
+      res.send(result);
+    });
+
+    // get all jobs data from database for count
     app.get("/jobscount", async (req, res) => {
-   
-        const result = await jobsCollection.countDocuments();
-        res.send({ count: result });
+      const filter = req.query.filter;
+      const search = req.query.search;
 
-      });
+      let query = {
+        title: {
+          $regex: search ? search : ".*",
+          $options: "i",
+        }
+      }
+      if (filter) query.category = filter;
+
+      const result = await jobsCollection.countDocuments(query);
+      res.send({ count: result });
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
