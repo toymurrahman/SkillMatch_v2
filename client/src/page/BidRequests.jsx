@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React  from "react";
 import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -25,12 +25,7 @@ const BidRequests = () => {
   } = useQuery({
     queryKey: ["bids", user?.email],
     queryFn: () => getData(),
-    // enabled: !!user?.email,
   });
-
-  // useEffect(() => {
-  //   getData();
-  // }, [user]);
 
   // tanstack mutation
   const { mutateAsync } = useMutation({

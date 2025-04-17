@@ -1,13 +1,14 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { AuthContext } from "./../provider/AuthProvider";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
+import useAuth from "../hooks/useAuth";
 
 const JobDetails = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
+
   const navigate = useNavigate();
   const job = useLoaderData();
   const {
@@ -24,7 +25,8 @@ const JobDetails = () => {
 
   // form Submission handler
   const handleFormSubmit = async (event) => {
-    if (user?.email === buyer?.email) return toast.error("You can't bid on your own job.");
+    if (user?.email === buyer?.email)
+      return toast.error("You can't bid on your own job.");
     event.preventDefault();
     const form = event.target;
     const price = parseFloat(form.price.value);
@@ -50,14 +52,18 @@ const JobDetails = () => {
       title,
       category,
     };
-    console.table(bidData);
+    // console.table(bidData);
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/bid`, bidData);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/bid`,
+        bidData
+      );
       console.log("Bid submitted successfully:", data);
       toast.success("Bid submitted successfully!");
       navigate("/mybids");
     } catch (error) {
-      console.log("Error submitting form:", error);
+      toast.error(error.response.data.message);
+      event.target.reset();
     }
   };
 
@@ -85,9 +91,12 @@ const JobDetails = () => {
           </p>
           <div className="flex justify-between items-center gap-5">
             <div className="ml-10">
-              <p className="mt-2 text-sm  text-gray-600 ">Name:   {''}{buyer.name} </p>
               <p className="mt-2 text-sm  text-gray-600 ">
-                Email:{''} {buyer.email}
+                Name: {""}
+                {buyer.name}{" "}
+              </p>
+              <p className="mt-2 text-sm  text-gray-600 ">
+                Email:{""} {buyer.email}
               </p>
             </div>
             <div className="rounded-full mr-10 object-cover overflow-hidden w-14 h-14">
@@ -116,6 +125,7 @@ const JobDetails = () => {
                 id="price"
                 type="text"
                 name="price"
+                required
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md   focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40  focus:outline-none focus:ring"
               />
             </div>

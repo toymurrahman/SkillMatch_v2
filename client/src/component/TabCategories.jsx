@@ -6,12 +6,7 @@ import axios from "axios";
 
 const TabCategories = () => {
   const [jobs, setJobs] = useState([]);
-  const categories = [
-    "Web Development",
-    "Graphics Design",
-    "Digital Marketing",
-  ];
-
+  
   useEffect(() => {
     const getData = async () => {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
@@ -19,7 +14,12 @@ const TabCategories = () => {
     };
     getData();
   }, []);
-
+  
+  const categories = [
+    "Web Development",
+    "Graphics Design",
+    "Digital Marketing",
+  ];
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}

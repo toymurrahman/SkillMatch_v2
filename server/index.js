@@ -49,20 +49,20 @@ async function run() {
     const jobsCollection = client.db("skillmatch").collection("jobs");
     const bidsCollection = client.db("skillmatch").collection("bids");
 
-
     // JWT token Generation
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "22d",
       });
-      res.cookie('Token', token,{
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-        maxAge: 22 * 24 * 60 * 60 * 1000,
-      })
-      .send({success: true})
+      res
+        .cookie("Token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+          maxAge: 22 * 24 * 60 * 60 * 1000,
+        })
+        .send({ success: true });
     });
     // clear token when user logout
     app.get("/logout", (req, res) => {
@@ -73,7 +73,6 @@ async function run() {
       });
       res.send({ success: true });
     });
-
 
     // get all jobs data from database
     app.get("/jobs", async (req, res) => {
@@ -130,12 +129,7 @@ async function run() {
       res.send(result);
     });
 
-    // save data in bid
-    app.post("/bid", async (req, res) => {
-      const bidData = req.body;
-      const result = await bidsCollection.insertOne(bidData);
-      res.send(result);
-    });
+
     // get all bids data from database
     app.get("/bid", async (req, res) => {
       const query = {};
@@ -143,8 +137,24 @@ async function run() {
       const bids = await cursor.toArray();
       res.send(bids);
     });
+    // save data in bid
+    app.post("/bid", async (req, res) => {
+      const bidData = req.body;
+      const query = {
+        job_id: bidData.job_id,
+        email: bidData.email,
+      };
+      const aleadyBid = await bidsCollection.findOne(query);
+      if (aleadyBid) {
+        return res
+          .status(400)
+          .send({ message: "You already bid for this job" });
+      }
+      const result = await bidsCollection.insertOne(bidData);
+      res.send(result);
+    });
     // get all bids data by email from database
-    app.get("/mybids/:email",verifyJWT, async (req, res) => {
+    app.get("/mybids/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const cursor = bidsCollection.find(query);
@@ -155,7 +165,7 @@ async function run() {
     //  get bid req for job owner
     app.get("/bidrequest/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
-      const query = { buyer_email : email };
+      const query = { buyer_email: email };
       const cursor = bidsCollection.find(query);
       const bids = await cursor.toArray();
       res.send(bids);
@@ -173,8 +183,24 @@ async function run() {
       res.send(result);
     });
 
- 
+    // Pagination and filtering
+      // get all jobs data from database for pagination
+      app.get("/alljobs", async (req, res) => {
+        const page = parseInt(req.query.page) - 1;
+        const size = parseInt(req.query.size);  
 
+        const result = await jobsCollection.find().skip(page*size).limit(size).toArray();
+  
+        res.send(result);
+      });
+
+        // get all jobs data from database for count
+    app.get("/jobscount", async (req, res) => {
+   
+        const result = await jobsCollection.countDocuments();
+        res.send({ count: result });
+
+      });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
