@@ -1,8 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const serverless = require("serverless-http");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -14,6 +14,7 @@ const corsOptions = {
     "http://localhost:5174",
     "https://skillmatch-914bf.firebaseapp.com",
     "https://skillmatch-914bf.web.app",
+    "https://skilllmatch.app",
    
   ],
   credentials: true,
@@ -60,14 +61,14 @@ async function run() {
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "22d",
+        expiresIn: "12h",
       });
       res
         .cookie("Token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-          maxAge: 22 * 24 * 60 * 60 * 1000,
+          
         })
         .send({ success: true });
     });
@@ -236,22 +237,20 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("successfully connected to MongoDB!");
-  } finally {
+  } 
+  finally {
     // Ensures that the client will close when you finish/error
-    // await client.close();
   }
 }
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello from the server!");
+  res.send("Say Hi to your dream");
 });
-
 
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-module.exports.handler = serverless(app);
