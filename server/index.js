@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const serverless = require("serverless-http");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
@@ -8,7 +9,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174","https://skillmatch-914bf.firebaseapp.com","https://skillmatch-914bf.web.app"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://skillmatch-914bf.firebaseapp.com",
+    "https://skillmatch-914bf.web.app",
+   
+  ],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -242,6 +249,9 @@ app.get("/", (req, res) => {
   res.send("Hello from the server!");
 });
 
+
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+module.exports.handler = serverless(app);
