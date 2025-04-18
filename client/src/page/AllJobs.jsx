@@ -105,7 +105,7 @@ const AllJobs = () => {
           <option value="dsc">Descending Order</option>
         </select>
 
-        <button onClick={handleReset} className="btn">Reset</button>
+        <button onClick={handleReset} className="btn px-8 py-4 rounded-md hover:bg-slate-700 hover:text-white">Reset</button>
       </div>
 
       {/* Jobs Grid */}
@@ -120,7 +120,7 @@ const AllJobs = () => {
         <button
           disabled={currentPage === 1}
           onClick={() => handlePaginationButton(currentPage - 1)}
-          className="px-4 py-2 mx-1 bg-gray-200 rounded-md disabled:opacity-50 hover:bg-blue-500 hover:text-white"
+          className="px-4 py-2 mx-1 bg-gray-200 rounded-md disabled:opacity-50 hover:bg-slate-700 hover:text-white"
         >
           Previous
         </button>
@@ -131,8 +131,8 @@ const AllJobs = () => {
             onClick={() => handlePaginationButton(num)}
             className={`px-4 py-2 mx-1 rounded-md transition-colors ${
               currentPage === num
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 hover:bg-blue-500 hover:text-white"
+                ? "bg-slate-700 text-white"
+                : "bg-gray-200 hover:bg-slate-700 hover:text-white"
             }`}
           >
             {num}
@@ -142,7 +142,7 @@ const AllJobs = () => {
         <button
           disabled={currentPage === numberOfPages}
           onClick={() => handlePaginationButton(currentPage + 1)}
-          className="px-4 py-2 mx-1 bg-gray-200 rounded-md disabled:opacity-50 hover:bg-blue-500 hover:text-white"
+          className="px-4 py-2 mx-1 bg-gray-200 rounded-md disabled:opacity-50 hover:bg-slate-700 hover:text-white"
         >
           Next
         </button>

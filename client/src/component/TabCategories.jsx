@@ -3,14 +3,22 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import JobCard from "./JobCard";
 import axios from "axios";
+import Spinner from "./Spinner";
 
 const TabCategories = () => {
   const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const getData = async () => {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
-      setJobs(data);
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+        setJobs(data);
+      } catch (error) {
+        console.error("Failed to fetch jobs:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     getData();
   }, []);
@@ -20,6 +28,7 @@ const TabCategories = () => {
     "Graphics Design",
     "Digital Marketing",
   ];
+  if (loading) return <Spinner />;
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
