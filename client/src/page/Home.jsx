@@ -1,7 +1,7 @@
 import React from 'react';
 import Carousel from '../component/Carousel';
 import TabCategories from '../component/TabCategories';
-import { useLoaderData } from 'react-router-dom';
+import About from './About';
 
 const Home = () => {
 
@@ -9,6 +9,7 @@ const Home = () => {
         <div>
             <Carousel/>
             <TabCategories />
+            <About/>
         </div>
     );
 };

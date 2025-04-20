@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import Spinner from "../component/Spinner";
 const BidRequests = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
@@ -12,7 +13,9 @@ const BidRequests = () => {
     // Fetch data from the server
     const getData = async () => {
       const { data } = await axiosSecure(`/bidrequest/${user.email}`);
+
       return data;
+     
     };
 
   // tanstack query get
@@ -51,9 +54,7 @@ const BidRequests = () => {
     return <p className="text-red-500">Error loading bids: {error.message}</p>;
   }
   if (isLoading) {
-    return (
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-black border-teal-500"></div>
-    );
+    return <Spinner/>;
   }
 
   return (

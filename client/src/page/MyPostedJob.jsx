@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../hooks/useAuth";
 import useAxiosSecure from "../hooks/useAxiosSecure";
+import Spinner from "../component/Spinner";
 
 const MyPostedJob = () => {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ const MyPostedJob = () => {
 
   // Loading & error states
   if (isLoading) {
-    return <div className="text-center py-10">Loading your posted jobs...</div>;
+    return <Spinner />;
   }
 
   if (isError) {
